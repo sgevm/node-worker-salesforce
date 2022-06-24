@@ -24,8 +24,9 @@ async function addJob() {
 
 async function updateJobs() {
     let res = await fetch(`/jobs`);
-    let result = await res.json();
-    result.array.forEach(job => {
+    var result = [];
+    result = await res.json();
+    result.forEach(job => {
       jobs[job.id] = job;
     });
     render();
