@@ -1,5 +1,3 @@
-const { json } = require("express");
-
 // Store for all of the jobs in progress
 let jobs = {};
 
