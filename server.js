@@ -42,18 +42,18 @@ app.get('/job/:id', async (req, res) => {
 });
 
 // Allows the client to query the state of a background job
-app.get('/jobs', async (req, res) => {
-  var jobs = await workQueue.getJobs(['waiting','delayed','active','completed','failed'], 0, 4, false); //completed, failed, delayed, active, waiting, paused, stuck or null
-  var jsonVal = jobs.map(job=>{
-    var jobId = job.id;
-    var state = await job.getState();
-    var progress = job._progress;
-    var reason = job.failedReason;
-    var returnvalue = job.returnvalue.value;
-    return { jobId, state, progress, reason, returnvalue };
-  });
-  res.json(jsonVal);
-});
+// app.get('/jobs', async (req, res) => {
+//   var jobs = await workQueue.getJobs(['waiting','delayed','active','completed','failed'], 0, 4, false); //completed, failed, delayed, active, waiting, paused, stuck or null
+//   var jsonVal = jobs.map(job=>{
+//     var jobId = job.id;
+//     var state = await job.getState();
+//     var progress = job._progress;
+//     var reason = job.failedReason;
+//     var returnvalue = job.returnvalue.value;
+//     return { jobId, state, progress, reason, returnvalue };
+//   });
+//   res.json(jsonVal);
+// });
 
 // Allows the client to query the state of a background job
 app.get('/job/:id/logs', async (req, res) => {
