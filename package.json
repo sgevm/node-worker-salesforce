@@ -6,10 +6,11 @@
   "license": "MIT",
   "dependencies": {
     "bull": "^3.7.0",
+    "dotenv": "^16.0.1",
     "express": "^4.16.4",
     "foreman": "^3.0.1",
-    "throng": "^4.0.0",
-    "dotenv": "^16.0.1"
+    "jsforce": "^1.11.0",
+    "throng": "^4.0.0"
   },
   "scripts": {
     "start": "nf start"
