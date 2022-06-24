@@ -7,7 +7,7 @@ let jobs = {};
 async function addJob() {
   let res = await fetch('job/', {method: 'POST'});
   let job = await res.json();
-  console.log('addJob . job: ' + JSON.stringify(job));
+  //console.log('addJob . job: ' + JSON.stringify(job));
   jobs[job.id] = {id: job.id, state: "queued"};
   render();
 }
