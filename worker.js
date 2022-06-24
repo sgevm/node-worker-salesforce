@@ -45,16 +45,16 @@ function start(id, disconnect) {
       }
     });
 
-    conn.login(process.env.SF_USERNAME, process.env.SF_PASSWORD, function(err, userInfo) {
+    conn.login(process.env.SF_USERNAME, process.env.SF_PASSWORD, (err, userInfo) => {
       if (err) { return console.error(err); }
       progress = 50;
       job.progress(progress);
       //process.env.SF_ACCESS_TOKEN=conn.accessToken;
       //process.env.SF_INSTANCE_URL=conn.instanceUrl;
 
-      
+      const sobjectJSON = { ApexClass__c : 'jsforce', ApexMethodName__c: 'create', Object_Name__c: 'Custom_Errors__c', Name: `heroku-node-worker-job-${job.id}`};
       // Single record creation
-      conn.sobject("Custom_Errors__c").create({ ApexClass__c : 'jsforce', ApexMethodName__c: 'create', Object_Name__c: 'Custom_Errors__c', Name: 'heroku-node-worker'}, function(err, ret) {
+      conn.sobject("Custom_Errors__c").create(sobjectJSON, function(err, ret) {
         if (err || !ret.success) { 
           console.error("Error in creating salesforce record : " + err);
           return console.error(err, ret); 
@@ -67,8 +67,6 @@ function start(id, disconnect) {
       conn.logout();
     });  
     
-    
-
     // A job can return values that will be stored in Redis as JSON
     // This return value is unused in this demo application.
     return { value: 'Successful Salesforce interaction! job.Id: ' + job.id +' SFDC Record Id:' + sfdcId };
