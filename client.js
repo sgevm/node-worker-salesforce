@@ -4,33 +4,33 @@ let jobs = {};
 // Kick off a new job by POST-ing to the server
 async function addJob() {
   let res = await fetch('job/', {method: 'POST'});
-  let job = await res.json();
+  //let job = await res.json();
   //console.log('addJob . job: ' + JSON.stringify(job));
-  jobs[job.id] = {id: job.id, state: "queued"};
+  //jobs[job.id] = {id: job.id, state: "queued"};
   render();
 }
 
 // Fetch updates for each job
-// async function updateJobs() {
-//   for (let id of Object.keys(jobs)) {
-//     let res = await fetch(`/job/${id}`);
-//     let result = await res.json();
-//     if (!!jobs[id]) {
-//       jobs[id] = result;
-//     }
-//     render();
-//   }
-// }
+async function updateJobs() {
+  for (let id of Object.keys(jobs)) {
+    let res = await fetch(`/job/${id}`);
+    let result = await res.json();
+    if (!!jobs[id]) {
+      jobs[id] = result;
+    }
+    render();
+  }
+}
 
 async function updateJobs() {
-    let res = await fetch(`/jobs`);
-    var result = [];
-    result = await res.json();
-    result.forEach(job => {
-      jobs[job.id] = job;
-    });
-    render();
-}
+//     let res = await fetch(`/jobs`);
+//     var result = [];
+//     result = await res.json();
+//     result.forEach(job => {
+//       jobs[job.id] = job;
+//     });
+//     render();
+// }
 
 // Manual Refresh jobs info
 function refresh() {
