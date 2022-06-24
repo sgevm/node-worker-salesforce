@@ -28,14 +28,7 @@ function start(id, disconnect) {
   // Connect to the named work queue
   let workQueue = new Queue('work', REDIS_URL);
 
-  var conn = new jsforce.Connection({
-    oauth2 : {
-      loginUrl : process.env.SF_LOGIN_URL,
-      clientId : process.env.SF_CLIENT_ID,
-      clientSecret : process.env.SF_CLIENT_SECRET,
-      redirectUri : process.env.SF_REDIRECT_URL
-    }
-  });
+
 
   workQueue.process(maxJobsPerWorker, async (job) => {
     // This is an example job that just slowly reports on progress
@@ -43,6 +36,15 @@ function start(id, disconnect) {
     var progress = 0;
     var sfdcId = '';
 
+    var conn = new jsforce.Connection({
+      oauth2 : {
+        loginUrl : process.env.SF_LOGIN_URL,
+        clientId : process.env.SF_CLIENT_ID,
+        clientSecret : process.env.SF_CLIENT_SECRET,
+        redirectUri : process.env.SF_REDIRECT_URL
+      }
+    });
+        
     conn.login(process.env.SF_USERNAME, process.env.SF_PASSWORD, function(err, userInfo) {
       if (err) { return console.error(err); }
       progress = 50;
@@ -57,7 +59,7 @@ function start(id, disconnect) {
         sfdcId = ret.id;
         console.log("Created record id : " + ret.id);
         job.progress(90);
-        conn.logout();
+        //conn.logout();
       });
 
     });  
