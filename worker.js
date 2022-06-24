@@ -61,14 +61,14 @@ function start(id, disconnect) {
         process.env.sfdcId = ret.id;
         console.log("Created record id : " + ret.id);
       });
-
+      
       job.progress(90);
       conn.logout();
     });  
     
     // A job can return values that will be stored in Redis as JSON
     // This return value is unused in this demo application.
-    return { value: 'Successful Salesforce interaction! job.Id: ' + job.id +' SFDC Record Id:' + process.env.sfdcId };
+    return { value: 'Started processing job.Id: ' + job.id };
   });//process
 
   function shutdown() {
