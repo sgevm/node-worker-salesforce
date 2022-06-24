@@ -54,7 +54,7 @@ function start(id, disconnect) {
 
       
       // Single record creation
-      conn.sobject("Custom_Errors__c").create({ ApexClass__c : 'jsforce', ApexMethodName__c: 'create', Object_Name__c: 'Custom_Errors__c', Description__c: 'heroku-node-worker', Name: Job.Id }, function(err, ret) {
+      conn.sobject("Custom_Errors__c").create({ ApexClass__c : 'jsforce', ApexMethodName__c: 'create', Object_Name__c: 'Custom_Errors__c', Name: 'heroku-node-worker'}, function(err, ret) {
         if (err || !ret.success) { 
           console.error("Error in creating salesforce record : " + err);
           return console.error(err, ret); 
