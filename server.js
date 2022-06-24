@@ -36,7 +36,7 @@ app.get('/job/:id', async (req, res) => {
     let state = await job.getState();
     let progress = job._progress;
     let reason = job.failedReason;
-    let returnvalue = job.returnvalue;
+    let returnvalue = job.returnvalue.value;
     res.json({ id, state, progress, reason, returnvalue });
   }
 });
