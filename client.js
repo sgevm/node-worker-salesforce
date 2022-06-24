@@ -48,6 +48,7 @@ function render() {
 
 // Renders the HTML for each job object
 function renderJob(job) {
+  let returnvalue = job.returnvalue;
   let progress = job.progress || 0;
   let color = "bg-light-purple";
 
@@ -64,7 +65,8 @@ function renderJob(job) {
     .replace('{{id}}', job.id)
     .replace('{{state}}', job.state)
     .replace('{{color}}', color)
-    .replace('{{progress}}', progress);
+    .replace('{{progress}}', progress)
+    .replace('{{returnvalue}}', returnvalue);
 }
 
 // Attach click handlers and kick off background processes
