@@ -44,7 +44,7 @@ function start(id, disconnect) {
         redirectUri : process.env.SF_REDIRECT_URL
       }
     });
-        
+
     conn.login(process.env.SF_USERNAME, process.env.SF_PASSWORD, function(err, userInfo) {
       if (err) { return console.error(err); }
       progress = 50;
@@ -55,7 +55,10 @@ function start(id, disconnect) {
       
       // Single record creation
       conn.sobject("Custom_Errors__c").create({ ApexClass__c : 'jsforce', ApexMethodName__c: 'create', Object_Name__c: 'Custom_Errors__c', Description__c: 'heroku-node-worker', Name: Job.Id }, function(err, ret) {
-        if (err || !ret.success) { return console.error(err, ret); }
+        if (err || !ret.success) { 
+          console.error("Error in creating salesforce record : " + err);
+          return console.error(err, ret); 
+        }
         sfdcId = ret.id;
         console.log("Created record id : " + ret.id);
         job.progress(90);
