@@ -22,6 +22,11 @@ async function updateJobs() {
   }
 }
 
+// Manual Refresh jobs info
+function refresh() {
+  updateJobs();
+}//refresh
+
 // Delete all stored jobs
 function clear() {
   jobs = {};
@@ -66,6 +71,7 @@ function renderJob(job) {
 window.onload = function() {
   document.querySelector("#add-job").addEventListener("click", addJob);
   document.querySelector("#clear").addEventListener("click", clear);
+  document.querySelector("#refresh").addEventListener("click", refresh);
 
-  setInterval(updateJobs, 200);
+  //setInterval(updateJobs, 200);
 };
