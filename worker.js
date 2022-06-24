@@ -34,7 +34,6 @@ function start(id, disconnect) {
     // This is an example job that just slowly reports on progress
     // while doing no work. Replace this with your own job logic.
     var progress = 0;
-    var sfdcId = '';
 
     var conn = new jsforce.Connection({
       oauth2 : {
@@ -59,7 +58,7 @@ function start(id, disconnect) {
           console.error("Error in creating salesforce record : " + err);
           return console.error(err, ret); 
         }
-        sfdcId = ret.id;
+        process.env.sfdcId = ret.id;
         console.log("Created record id : " + ret.id);
       });
 
@@ -69,7 +68,7 @@ function start(id, disconnect) {
     
     // A job can return values that will be stored in Redis as JSON
     // This return value is unused in this demo application.
-    return { value: 'Successful Salesforce interaction! job.Id: ' + job.id +' SFDC Record Id:' + sfdcId };
+    return { value: 'Successful Salesforce interaction! job.Id: ' + job.id +' SFDC Record Id:' + process.env.sfdcId };
   });//process
 
   function shutdown() {
