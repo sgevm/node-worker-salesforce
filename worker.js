@@ -61,10 +61,10 @@ function start(id, disconnect) {
         }
         sfdcId = ret.id;
         console.log("Created record id : " + ret.id);
-        //job.progress(90);
-        //conn.logout();
       });
 
+      job.progress(90);
+      conn.logout();
     });  
     
     
