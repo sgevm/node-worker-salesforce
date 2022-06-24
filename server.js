@@ -20,6 +20,7 @@ app.post('/job', async (req, res) => {
   // This would be where you could pass arguments to the job
   // Ex: workQueue.add({ url: 'https://www.heroku.com' })
   // Docs: https://github.com/OptimalBits/bull/blob/develop/REFERENCE.md#queueadd
+  console.log('server . POST /job . req:' + JSON.stringify(req));
   let job = await workQueue.add();
   res.json({ id: job.id });
 });
