@@ -75,7 +75,50 @@ function start(id, disconnect) {
     console.log(`Worker ${ id } cleanup.`);
     disconnect();
   }//shutdown
+
+  
+  workQueue.on('active', function (job, jobPromise) {
+    // A job has started. You can use `jobPromise.cancel()`` to abort it.
+    job.log('job is activated');
+  });
+  
+  workQueue.on('stalled', function (job) {
+    // A job has been marked as stalled. This is useful for debugging job
+    // workers that crash or pause the event loop.
+    job.log('job is stalled');
+  });
+   
+  workQueue.on('progress', function (job, progress) {
+    // A job's progress was updated!
+    job.log('job progress is updated');
+  });
+  
+  workQueue.on('completed', function (job, result) {
+    // A job successfully completed with a `result`.
+    job.log('job is completed');
+  });
+  
+  workQueue.on('failed', function (job, err) {
+    // A job failed with reason `err`!
+    job.log('job is failed');
+  });
+  
+  workQueue.on('resumed', function (job) {
+    // The queue has been resumed.
+    job.log('job has resumed');
+  }); 
+ 
+  workQueue.on('removed', function (job) {
+    // A job successfully removed.
+    job.log('job has been removed');
+  });
+  
+
 }//start
+
+function disconnect(){
+  console.log(`disconnect().`);
+}//disconnect
 
 // Initialize the clustered worker process
 // See: https://devcenter.heroku.com/articles/node-concurrency for more info

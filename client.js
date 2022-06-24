@@ -11,15 +11,24 @@ async function addJob() {
 }
 
 // Fetch updates for each job
+// async function updateJobs() {
+//   for (let id of Object.keys(jobs)) {
+//     let res = await fetch(`/job/${id}`);
+//     let result = await res.json();
+//     if (!!jobs[id]) {
+//       jobs[id] = result;
+//     }
+//     render();
+//   }
+// }
+
 async function updateJobs() {
-  for (let id of Object.keys(jobs)) {
-    let res = await fetch(`/job/${id}`);
+    let res = await fetch(`/jobs`);
     let result = await res.json();
-    if (!!jobs[id]) {
-      jobs[id] = result;
-    }
+    result.array.forEach(job => {
+      jobs[job.id] = job;
+    });
     render();
-  }
 }
 
 // Manual Refresh jobs info
