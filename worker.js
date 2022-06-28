@@ -23,7 +23,7 @@ let maxJobsPerWorker = 1;
 
 function start(id, disconnect) {
   console.log(`start() : Started worker ${ id } / pid:` + process.pid);
-  
+
   process.on('SIGTERM', ()=>{
     console.log('shutdown' + process.pid);
     db.run("UPDATE jobs SET status=? message=? WHERE status=?", ['Aborted', 'Aborted on shutdown', 'In Progress'],function(err,rows){
@@ -123,6 +123,7 @@ function start(id, disconnect) {
   workQueue.on('failed', function (job, err) {
     // A job failed with reason `err`!
     console.log('onFailed:'+job.id);
+    console.log(err);
   });
   
   workQueue.on('resumed', function (job) {
