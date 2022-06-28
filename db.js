@@ -16,7 +16,7 @@ db.serialize(function() {
     sc_records INTEGER, \
     start_dt TEXT DEFAULT CURRENT_TIMESTAMP, \
     end_dt TEXT \
-  )");
+  )"); 
   
 });
 
