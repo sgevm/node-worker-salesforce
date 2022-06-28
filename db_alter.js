@@ -25,6 +25,22 @@ var dbc = new sqlite3.Database('./var/db/jobs.db',(err)=>{
                 console.log('success with SELECT . no rows');
             }
         });
+
+        console.log('before insert #1');
+        dbc.run('INSERT INTO jobs (jobid, status) VALUES (?, ?)', ['1', 'In Progress'], function(err) {
+            if (err) { 
+                console.log(err);
+            }
+            console.log('insert #1 success');
+          });
+
+        console.log('before insert #2');
+        dbc.run('INSERT INTO jobs (jobid, status, message, mc_records, sc_records) VALUES (?, ?, ?, ?, ?)', ['1', 'In Progress', 'New', 0, 0], function(err) {
+            if (err) { 
+                console.log(err);
+            }
+            console.log('insert #2 success');
+          });
     }    
 });
 
