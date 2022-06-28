@@ -13,7 +13,7 @@ var dbc = new sqlite3.Database('./var/db/jobs.db',(err)=>{
         dbc.run("ALTER TABLE jobs ADD COLUMN start_dt TEXT DEFAULT CURRENT_TIMESTAMP");
         dbc.run("ALTER TABLE jobs ADD COLUMN end_dt TEXT");
 
-        dbc.getAll('SELECT * FROM jobs', [], function(err, rows) {
+        dbc.all('SELECT * FROM jobs', [], function(err, rows) {
             if (err) { 
                 console.log('error with SELECT');
                 console.log(err);
