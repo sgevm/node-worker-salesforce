@@ -22,12 +22,16 @@ let workers = process.env.WEB_CONCURRENCY || 1;
 let maxJobsPerWorker = 1;
 
 function start(id, disconnect) {
-  console.log(`start() : Started worker ${ id } / pid:` + process.pid);
+  console.log(`start() : Started worker ${ id }`);
 
   process.on('SIGTERM', ()=>{
-    console.log('shutdown' + process.pid);
+    console.log('shutdown');
     db.run("UPDATE jobs SET status=? message=? WHERE status=?", ['Aborted', 'Aborted on shutdown', 'In Progress'],function(err,rows){
-      if (err) { console.log(err); /*throw an error*/ }
+      if (err) { 
+        console.log('shutdown . update jobs.status & message:'); 
+        console.log(err); 
+        /*throw an error*/ 
+      }
     });
     //disconnect(); 
   });
