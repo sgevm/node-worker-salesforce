@@ -14,24 +14,35 @@
       <div class="flex justify-between mb2">
         <div class='mt2 mb1'><span class="hk-label">Job ID:</span> {{id}}</div>
         <div class='mt2 mb1'><span class="hk-label">State:</span> {{state}}</div>
-        <div class='mt2 mb1'><span class="hk-label">Return Value:</span> {{returnvalue}}</div>
-        <div class='mt2 mb1'><a href="/job/{{id}}/logs" id="joblog" class='f2 link purple ph2 pv1 ba b--purple br1'>Logs</a></div>
+        <div class='mt2 mb1'><span class="hk-label">Reason:</span> {{reason}}</div>
+        <div class='mt2 mb1'><a href="#" id="remove" data-jobid="{{id}}" onclick="remove(event); render();" class='f2 link purple ph2 pv1 ba b--purple br1'>Remove</a></div>
+        <div class='mt2 mb1'><a href="#" id="logs" data-jobid="{{id}}" onclick="joblogs(event);" class='f2 link purple ph2 pv1 ba b--purple br1'>Logs</a></div>
       </div>
       <div class="w-100 br1 shadow-inner-1 bg-light-silver">
         <span class="db h1 br1 {{color}}" style="width: {{progress}}%;"></span>
       </div>
     </div>
   </script>
+  <script type="text/template" id="job-logs-template">
+    <div class="flex flex-column ma2">
+      <div class="flex justify-between mb2">
+        <div class='mt2 mb1'><span class="hk-label">Logs:</span>{{logs}}</div>
+      </div>
+    </div>
+  </script>  
   <div class="main-content flex flex-column justify-center items-center w-100 mt4">
     <div class='br2 flex flex-column items-center pv3'>
       <div class='f1 mt2 mb1'>Create long-running jobs</div>
       <div class='flex mt2'>
         <a href='#' id="add-job" class='f2 link purple ph2 pv1 ba b--purple br1 mr4'>Add Job</a>
         <a href='#' id="refresh" class='f2 link purple ph2 pv1 ba b--purple br1'>Refresh</a>
+        <a href='#' id="refreshstatus" class='f2 link purple ph2 pv1 ba b--purple br1'>Refresh Status</a>
         <a href='#' id="clear" class='f2 link purple ph2 pv1 ba b--purple br1'>Clear</a>
       </div>
     </div>
     <div id="job-summary" class="w-80 f3"></div>
+    <div id="job-logs" class="w-80 f3"></div>
+    <div id="job-table" class="w-80 f3"></div>
     <div class="h6 flex flex-column justify-end">
       <div class="shadow-3 pa4 tc f3">
         <span class="hk-label">Tip:</span> Jobs not running? Be sure to run <code class="pre">heroku ps:scale worker=1</code>

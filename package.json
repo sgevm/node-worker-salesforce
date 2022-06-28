@@ -10,9 +10,16 @@
     "express": "^4.16.4",
     "foreman": "^3.0.1",
     "jsforce": "^1.11.0",
-    "throng": "^4.0.0"
+    "sqlite3": "^5.0.8",
+    "throng": "^4.0.0",
+    "xml2js": "^0.4.23"
   },
   "scripts": {
-    "start": "nf start"
+    "start": "nf start",
+    "dev-start-server": "nodemon server.js",
+    "dev-start-worker": "nodemon worker.js"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.18"
   }
 }

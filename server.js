@@ -1,5 +1,6 @@
 let express = require('express');
 let Queue = require('bull');
+var db = require("./db");
 
 // Serve on PORT on Heroku and on localhost:5000 locally
 let PORT = process.env.PORT || '5000';
@@ -20,8 +21,10 @@ app.post('/job', async (req, res) => {
   // This would be where you could pass arguments to the job
   // Ex: workQueue.add({ url: 'https://www.heroku.com' })
   // Docs: https://github.com/OptimalBits/bull/blob/develop/REFERENCE.md#queueadd
-  console.log('server . POST /job . req:');
+  console.log('server . POST /job . req');
+  //console.log(req);
   let job = await workQueue.add();
+  console.log('server . POST /job . job.id:'+job.id);
   res.json({ id: job.id });
 });
 
@@ -36,37 +39,94 @@ app.get('/job/:id', async (req, res) => {
     let state = await job.getState();
     let progress = job._progress;
     let reason = job.failedReason;
-    let returnvalue = job.returnvalue.value;
+    let returnvalue = (job.returnvalue==undefined?'':job.returnvalue.value);
     res.json({ id, state, progress, reason, returnvalue });
   }
 });
 
-// Allows the client to query the state of a background job
-// app.get('/jobs', async (req, res) => {
-//   var jobs = await workQueue.getJobs(['waiting','delayed','active','completed','failed'], 0, 4, false); //completed, failed, delayed, active, waiting, paused, stuck or null
-//   var jsonVal = jobs.map(job=>{
-//     var jobId = job.id;
-//     var state = await job.getState();
-//     var progress = job._progress;
-//     var reason = job.failedReason;
-//     var returnvalue = job.returnvalue.value;
-//     return { jobId, state, progress, reason, returnvalue };
-//   });
-//   res.json(jsonVal);
-// });
-
-// Allows the client to query the state of a background job
+// Allows the client to query the job logs
 app.get('/job/:id/logs', async (req, res) => {
   let id = req.params.id;
   let job = await workQueue.getJob(id);
-
   if (job === null) {
     res.status(404).end();
   } else {
-    let jobLogObj = await job.getJobLogs();
-    let log = jobLogObj.logs.join('-');
-    res.json({ log });
+    //console.log(workQueue);
+    //let logsPromise = await workQueue.getJobLogs(id);
+    let logs = 'logs';//await logsPromise.json();
+    res.json({ logs });
+  }  
+});
+
+// Allows the client to query the state of a background job
+app.get('/jobs', async (req, res) => {
+  var jobs = await workQueue.getJobs(['waiting','delayed','active','completed','failed']); //completed, failed, delayed, active, waiting, paused, stuck or null
+  var jsonVal = [];
+  jobs.forEach((job)=>{    
+    var id = job.id;
+    var progress = job._progress;
+    var state = '';//job.getState();
+    var reason = job.failedReason;
+    var returnvalue = (job.returnvalue==undefined?'':job.returnvalue.value);
+    jsonVal.push({ id, state, progress, reason, returnvalue });    
+  });
+  //console.log(jsonVal);
+  res.json(jsonVal);
+});
+
+
+app.get('/jobtable', async (req, res) => {
+  var promiseQueryAll = () => {
+    return new Promise((resolve, reject) => {
+      db.all("SELECT * FROM jobs", (err,rows) => {
+          if (err) { 
+            reject(err) 
+          }else{
+            resolve(rows);
+          }});
+    });
   }
+  var rows = await promiseQueryAll();
+  var rowsjson = rows.map((row) => {
+    return {jobid: row.jobid, external_key: row.external_key, status: row.status, message: row.message, mc_records: row.mc_records, sc_records: row.sc_records, start_dt: row.start_dt, end_dt: row.end_dt};
+  });
+  console.log('GET /jobstable:');
+  console.log(rowsjson);
+  res.json(rowsjson);
+
+  // db.all("SELECT * FROM jobs", (err,rows) => {
+  //   var rowsjson = rows.map((row) => {
+  //         return {jobid: row.jobid, external_key: row.external_key, status: row.status, message: row.message, mc_records: row.mc_records, sc_records: row.sc_records};
+  //   });
+  //   console.log(rowsjson);
+  //   res.json(rowsjson);
+  // });
+});
+
+// Allows the client to query the state of a background job
+app.delete('/job/:id', async (req, res) => {
+  let id = req.params.id;
+  console.log('DELETE /job/:id:'+id);
+  let job = await workQueue.getJob(id);
+
+  if (job === null) {
+    //res.status(404).end();
+    console.log('job not found for deletion');
+  } else {
+    let state = await job.remove();
+    console.log('DELETE /job/:id:'+id + ' . removed');
+    res.sendStatus(200);// json({id});
+  }
+
+  db.run("DELETE FROM jobs WHERE jobid=?", id, function(err) {
+    if(err){
+        console.log(err)
+    }
+    else{
+        console.log("Successful");
+    }
+  });
+
 });
 
 // You can listen to global events to get notified when jobs are processed
