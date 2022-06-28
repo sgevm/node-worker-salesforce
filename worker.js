@@ -90,7 +90,9 @@ function start(id, disconnect) {
 
     // });  
 
+    console.log(`....inside workQueue.process - before generateToken`);
     generateToken(job);
+    console.log(`....inside workQueue.process - after generateToken`);
     
     // A job can return values that will be stored in Redis as JSON
     // This return value is unused in this demo application.
@@ -144,6 +146,7 @@ function start(id, disconnect) {
 
 
 function generateToken(job) {  
+  console.log(`....inside generateToken`);
   var options = { method: 'POST',
     url: `${process.env.MC_TOKEN_URL}`,
     headers: 
@@ -159,7 +162,10 @@ function generateToken(job) {
     json: true };
   
     request(options, (error, response, body) => {
+      console.log(`....inside generateToken.request`);
       if (error) {
+        console.log(`....inside generateToken.request.error`);
+        console.log(error);
         process.env.MC_CONNECTION_STATUS=error;
         throw new Error(error);
       }
