@@ -35,7 +35,7 @@ var dbc = new sqlite3.Database('./var/db/jobs.db',(err)=>{
           });
 
         console.log('before insert #2');
-        dbc.run('INSERT INTO jobs (jobid, status, message, mc_records, sc_records) VALUES (?, ?, ?, ?, ?)', ['1', 'In Progress', 'New', 0, 0], function(err) {
+        dbc.run('INSERT INTO jobs (jobid, status, message, mc_records, sc_records) VALUES (?, ?, ?, ?, ?)', ['2', 'In Progress', 'New', 0, 0], function(err) {
             if (err) { 
                 console.log(err);
             }
