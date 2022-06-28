@@ -28,7 +28,7 @@ function start(id, disconnect) {
     db.run("UPDATE jobs SET status=? message=? WHERE status=?", ['Aborted', 'Aborted on shutdown', 'In Progress'],function(err,rows){
       if (err) { console(err); /*throw an error*/ }
     });
-    disconnect();
+    //disconnect();
   });
 
 
@@ -50,6 +50,7 @@ function start(id, disconnect) {
           if (err) { console.log(err); /*throw an error*/ }
         });
       }else{
+        console.log(`....inside workQueue.process ${job.id} - before update`);
         db.run("UPDATE jobs SET status=? WHERE jobid=?", ['In Progress', job.id],function(err,rows){
           if (err) { console.log(err); /*throw an error*/ }
         });
