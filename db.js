@@ -18,6 +18,7 @@ db.serialize(function() {
     end_dt TEXT \
   )"); 
   
+  console.log("db.js - after DDL statements");
 });
 
 module.exports = db;
