@@ -28,7 +28,7 @@ function start(id, disconnect) {
     db.run("UPDATE jobs SET status=? message=? WHERE status=?", ['Aborted', 'Aborted on shutdown', 'In Progress'],function(err,rows){
       if (err) { console(err); /*throw an error*/ }
     });
-    //disconnect();
+    //disconnect(); 
   });
 
 
