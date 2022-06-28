@@ -26,7 +26,7 @@ function start(id, disconnect) {
 
   process.on('SIGTERM', ()=>{
     console.log('shutdown');
-    db.run("UPDATE jobs SET status=? message=? WHERE status=?", ['Aborted', 'Aborted on shutdown', 'In Progress'],function(err,rows){
+    db.run("UPDATE jobs SET status=?, message=? WHERE status=?", ['Aborted', 'Aborted on shutdown', 'In Progress'],function(err,rows){
       if (err) { 
         console.log('shutdown . update jobs.status & message:'); 
         console.log(err); 
@@ -309,7 +309,7 @@ async function updateSFMCRecordCount(jobid, recordcount){
   console.log('----2.1....inside updateSFMCRecordCount ');
   var promiseQuery = () => {
     return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM jobs WHERE jobid = ?', [ jobid ], (err, row) => {
+        db.get('SELECT * FROM jobs WHERE jobid =?', [ jobid ], (err, row) => {
           if (err) { 
             reject(err) 
           }else{
@@ -358,7 +358,7 @@ async function updateSFSCRecordCount(jobid, recordcount){
   console.log('--------4.1....inside updateSFSCRecordCount ');
   var promiseQuery = () => {
     return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM jobs WHERE jobid = ?', [ jobid ], (err, row) => {
+        db.get('SELECT * FROM jobs WHERE jobid =?', [ jobid ], (err, row) => {
           if (err) { 
             reject(err) 
           }else{
