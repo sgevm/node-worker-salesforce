@@ -26,7 +26,7 @@ function start(id, disconnect) {
   process.on('SIGTERM', ()=>{
     console.log('shutdown' + process.pid);
     db.run("UPDATE jobs SET status=? message=? WHERE status=?", ['Aborted', 'Aborted on shutdown', 'In Progress'],function(err,rows){
-      if (err) { console(err); /*throw an error*/ }
+      if (err) { console.log(err); /*throw an error*/ }
     });
     //disconnect(); 
   });
@@ -43,7 +43,7 @@ function start(id, disconnect) {
     console.log(`....inside workQueue.process ${job.id}`);
 
     db.get('SELECT * FROM jobs WHERE jobid = ?', [ job.id ], function(err, row) {
-      if (err) { console(err); /*throw an error*/ }
+      if (err) { console.log(err); /*throw an error*/ }
       if (!row) { 
         console.log(`....inside workQueue.process ${job.id} - before insert`);
         db.run('INSERT INTO jobs (jobid, status, message, mc_records, sc_records) VALUES (?, ?, ?, ?, ?)', [job.id, 'In Progress', 'New', 0, 0], function(err) {
@@ -225,7 +225,7 @@ async function fetchDataExtensionRecords(jobid, conn, pOverallStatus, pRequestId
 
       console.log('1.2....inside fetchDataExtensionRecords UPDATE jobs.extenal_key');
       db.run("UPDATE jobs SET external_key=? WHERE jobid=?", [retrieveResponse.RequestID, jobid],function(err,rows){
-        if (err) { console(err); /*throw an error*/ }
+        if (err) { console.log(err); /*throw an error*/ }
       });
 
       var jsonResults=[];
@@ -285,7 +285,7 @@ async function salesforceBulkUpsert(jobid, conn, records, pOverallStatus, pReque
     }else{
       console.log('------3.5....UPDATE jobs.status=Completed');
       db.run("UPDATE jobs SET status=?, end_dt=datetime('now') WHERE jobid=?", ['Completed', jobid],function(err,rows){
-        if (err) { console(err); /*throw an error*/ }
+        if (err) { console.log(err); /*throw an error*/ }
       });
     }
   });//load
@@ -326,14 +326,14 @@ async function updateSFMCRecordCount(jobid, recordcount){
   var rows = await promiseUpate();
 
   // await db.get('SELECT * FROM jobs WHERE jobid = ?', [ jobid ], async (err, row) => {
-  //   if (err) { console(err); /*throw an error*/ }
+  //   if (err) { console.log(err); /*throw an error*/ }
   //   if (row) { 
   //     let mc_records = (row.MC_RECORDS==undefined?0:row.MC_RECORDS);
   //     console.log(`updateSFMCRecordCount . jobid = ${jobid} mc_records = ${mc_records}`);      
   //     mc_records += recordcount;
   //     console.log(`updateSFMCRecordCount . jobid = ${jobid} mc_records = ${mc_records}`);
   //     db.run("UPDATE jobs SET MC_RECORDS=? WHERE jobid=?", [mc_records, jobid],function(err,rows){
-  //       if (err) { console(err); /*throw an error*/ 
+  //       if (err) { console.log(err); /*throw an error*/ 
   //       }else{
   //         console.log('successfully updated MC_RECORDS');
   //       }
@@ -375,7 +375,7 @@ async function updateSFSCRecordCount(jobid, recordcount){
   /*
   await db.get('SELECT * FROM jobs WHERE jobid = ?', [ jobid ], async (err, row) => {
     if (err) { 
-      console(err); 
+      console.log(err); 
       //throw an error 
     }
     if (row) { 
@@ -383,7 +383,7 @@ async function updateSFSCRecordCount(jobid, recordcount){
       sc_records += recordcount;
       await db.run("UPDATE jobs SET SC_RECORDS=? WHERE jobid=?", [sc_records, jobid],function(err,rows){
         if (err) { 
-          console(err); 
+          console.log(err); 
           //throw an error 
         }else{
           console.log('successfully updated SC_RECORDS');
