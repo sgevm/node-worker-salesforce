@@ -465,7 +465,7 @@ async function insertJob(jobid, status, message){
             reject(err) 
           }else{
             console.log('....inside insertJob . resolve');
-            resolve();
+            resolve('Success!');
           }});
     });
   }
