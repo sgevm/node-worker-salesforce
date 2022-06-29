@@ -58,12 +58,17 @@ function start(id, disconnect) {
         // console.log(`....inside workQueue.process ${job.id} - before insert`);
         // await insertJob(job.id, 'In Progress', 'New', 0, 0);
         // console.log(`....inside workQueue.process ${job.id} - after insert`);
-        db.run('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?,?,?,?,?);', [ job.id, 'In Progress', 'New', 0, 0 ], (err) => {
+        db.run('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?,?,?,?,?);', [ job.id, 'In Progress', 'New', 0, 0 ], function (err) {
           if (err) { 
             console.log('....insert error');
             console.log(err);
           }else{
             console.log('....insert success');
+            console.log(`....insert success${this.lastID}`);
+            console.log(this.changes);
+            console.log(`....inside workQueue.process - before generateToken`);
+            generateToken(job);
+            console.log(`....inside workQueue.process - after generateToken`);            
           }});           
       }      
     }catch(e){
@@ -118,9 +123,7 @@ function start(id, disconnect) {
 
     // });  
 
-    console.log(`....inside workQueue.process - before generateToken`);
-    generateToken(job);
-    console.log(`....inside workQueue.process - after generateToken`);
+
     
     // A job can return values that will be stored in Redis as JSON
     // This return value is unused in this demo application.
