@@ -456,7 +456,7 @@ async function updateJobStatus(jobid, status){
   return await promiseUpdate();
 }//updateJobStatus
 async function insertJob(jobid, status, message){
-  console.log('....inside insertJob ');
+  console.log('....inside insertJob '+ jobid);
   var promiseInsert = () => {
     return new Promise((resolve, reject) => {
         db.run('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?,?,?,?,?)', [ jobid, status, message, 0, 0 ], (err) => {
