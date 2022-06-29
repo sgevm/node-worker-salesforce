@@ -55,10 +55,16 @@ function start(id, disconnect) {
         var rows = await updateJobStatus(job.id, 'In Progress');
         console.log(`....inside workQueue.process ${job.id} - after update`);
       }else{
-        console.log(`....inside workQueue.process ${job.id} - before insert`);
-        await insertJob(job.id, 'In Progress', 'New', 0, 0);
-        console.log(`....inside workQueue.process ${job.id} - after insert`);
-           
+        // console.log(`....inside workQueue.process ${job.id} - before insert`);
+        // await insertJob(job.id, 'In Progress', 'New', 0, 0);
+        // console.log(`....inside workQueue.process ${job.id} - after insert`);
+        db.run('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?,?,?,?,?)', [ job.id, 'In Progress', 'New', 0, 0 ], (err) => {
+          if (err) { 
+            console.log('....insert error');
+            console.log(err);
+          }else{
+            console.log('....insert success');
+          }});           
       }      
     }catch(e){
       console.log(e);
