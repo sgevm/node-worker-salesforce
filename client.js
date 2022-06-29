@@ -1,3 +1,5 @@
+const { json } = require("express");
+
 // Store for all of the jobs in progress
 let jobs = {};
 
@@ -16,14 +18,13 @@ async function updateJobs() {
     let res = await fetch(`/jobs`);
     var result = [];
     result = await res.json();
-    console.log('updateJobs . result');
+    console.log('updateJobs . result:' +JSON.stringify(result));
     console.log(result);
     result.forEach(job => {
       jobs[job.id] = job;
     });
     console.log('refresh . updateJobs . jobs');
     console.log(jobs);
-    render();
 }
 
 async function renderJobsTable() {
@@ -69,6 +70,7 @@ async function refresh() {
   }      
 }
 render();
+await renderJobsTable();
 }//refresh
 
 async function refreshstatus() {
