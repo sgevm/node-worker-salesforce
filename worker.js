@@ -469,7 +469,7 @@ async function insertJob(jobid, status, message){
           }});
     });
   }
-  await promiseInsert();
+  return await promiseInsert();
 }//insertJob
 
 // Initialize the clustered worker process
