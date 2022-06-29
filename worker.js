@@ -459,13 +459,12 @@ async function insertJob(jobid, status, message){
   console.log('....inside insertJob ');
   var promiseInsert = () => {
     return new Promise((resolve, reject) => {
-        db.get('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?,?,?,?,?)', [ jobid, status, message, 0, 0 ], (err) => {
+        db.get(`INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?,?,?,?,?)`, [ jobid, status, message, 0, 0 ], (err) => {
           if (err) { 
             console.log('....inside insertJob . reject');
             reject(err) 
           }else{
             console.log('....inside insertJob . resolve');
-            console.log(`Rows inserted ${this.changes}`);
             resolve();
           }});
     });
