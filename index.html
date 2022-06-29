@@ -16,7 +16,6 @@
         <div class='mt2 mb1'><span class="hk-label">State:</span> {{state}}</div>
         <div class='mt2 mb1'><span class="hk-label">Reason:</span> {{reason}}</div>
         <div class='mt2 mb1'><a href="#" id="remove" data-jobid="{{id}}" onclick="remove(event); render();" class='f2 link purple ph2 pv1 ba b--purple br1'>Remove</a></div>
-        <div class='mt2 mb1'><a href="#" id="logs" data-jobid="{{id}}" onclick="joblogs(event);" class='f2 link purple ph2 pv1 ba b--purple br1'>Logs</a></div>
       </div>
       <div class="w-100 br1 shadow-inner-1 bg-light-silver">
         <span class="db h1 br1 {{color}}" style="width: {{progress}}%;"></span>
@@ -36,7 +35,6 @@
       <div class='flex mt2'>
         <a href='#' id="add-job" class='f2 link purple ph2 pv1 ba b--purple br1 mr4'>Add Job</a>
         <a href='#' id="refresh" class='f2 link purple ph2 pv1 ba b--purple br1'>Refresh</a>
-        <a href='#' id="refreshstatus" class='f2 link purple ph2 pv1 ba b--purple br1'>Refresh Status</a>
         <a href='#' id="clear" class='f2 link purple ph2 pv1 ba b--purple br1'>Clear</a>
       </div>
     </div>

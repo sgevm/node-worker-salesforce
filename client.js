@@ -13,18 +13,6 @@ async function addJob() {
   render();
 }
 
-// Fetch updates for each job
-// async function updateJobs() {
-//   for (let id of Object.keys(jobs)) {
-//     let res = await fetch(`/job/${id}`);
-//     let result = await res.json();
-//     if (!!jobs[id]) {
-//       jobs[id] = result;
-//     }
-//     render();
-//   }
-// }
-
 async function updateJobs() {
     jobs={};
     let res = await fetch(`/jobs`);
@@ -52,17 +40,7 @@ async function renderJobsTable() {
   document.querySelector("#job-table").innerHTML = htmlval;
 }//renderJobsTable
 
-async function refreshstatus() {
-  await updateJobs();
-  for (let id of Object.keys(jobs)) {
-      let res = await fetch(`/job/${id}`);
-      let result = await res.json();
-      if (!!jobs[id]) {
-        jobs[id] = result;
-      }      
-  }
-  render();
-}//refreshstatus
+
 
 async function remove(e) {
   e.preventDefault();    
@@ -70,6 +48,7 @@ async function remove(e) {
   console.log('jobid:'+jobid); 
   let res = await fetch(`/job/${jobid}`, {method: 'DELETE'});
   await updateJobs();
+  await renderJobsTable();
 }//joblogs
 
 async function removejob(e) {
@@ -84,8 +63,27 @@ async function removejob(e) {
 // Manual Refresh jobs info
 async function refresh() {
  await updateJobs();
- await renderJobsTable();
+ for (let id of Object.keys(jobs)) {
+  let res = await fetch(`/job/${id}`);
+  let result = await res.json();
+  if (!!jobs[id]) {
+    jobs[id] = result;
+  }      
+}
+render();
 }//refresh
+
+async function refreshstatus() {
+  await updateJobs();
+  for (let id of Object.keys(jobs)) {
+      let res = await fetch(`/job/${id}`);
+      let result = await res.json();
+      if (!!jobs[id]) {
+        jobs[id] = result;
+      }      
+  }
+  render();
+}//refreshstatus
 
 // Delete all stored jobs
 function clear() {

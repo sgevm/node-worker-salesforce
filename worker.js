@@ -50,78 +50,20 @@ function start(id, disconnect) {
     try{
       var row = await queryJobById(job.id);
       if (row[0]) {
-        //console.log(row);
         console.log(`....inside workQueue.process ${job.id} - before update`);
         var rows = await updateJobStatus(job.id, 'In Progress');
         console.log(`....inside workQueue.process ${job.id} - after update`);
       }else{
-        // console.log(`....inside workQueue.process ${job.id} - before insert`);
-        // await insertJob(job.id, 'In Progress', 'New', 0, 0);
-        // console.log(`....inside workQueue.process ${job.id} - after insert`);
-        pool.query('INSERT INTO jobs(jobid, status, message, mc_records, sc_records, start_dt) VALUES($1,$2,$3,$4,$5,now()) RETURNING *', [ job.id, 'In Progress', 'New', 0, 0 ], function (err, results) {
-          if (err) { 
-            console.log('....insert error');
-            console.log(err);
-          }else{
-            console.log('....insert success ' + results.rows.length);
-            console.log(`....inside workQueue.process - before generateToken`);
-            generateToken(job);
-            console.log(`....inside workQueue.process - after generateToken`);            
-          }});           
+        console.log(`....inside workQueue.process ${job.id} - before insert`);
+        await insertJob(job.id, 'In Progress', 'New', 0, 0);
+        console.log(`....inside workQueue.process ${job.id} - after insert`);
+        console.log(`....inside workQueue.process - before generateToken`);
+        generateToken(job);
+        console.log(`....inside workQueue.process - after generateToken`);            
       }      
     }catch(e){
       console.log(e);
     }
-
-    // db.get('SELECT * FROM jobs WHERE jobid = ?', [ job.id ], function(err, row) {
-    //   if (err) { console.log(err); /*throw an error*/ }
-    //   if (!row) { 
-    //     console.log(`....inside workQueue.process ${job.id} - before insert`);
-    //     db.run('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?, ?, ?, ?, ?)', [`${job.id}`, 'In Progress', 'New', 0, 0], function(err) {
-    //       if (err) { console.log(err); /*throw an error*/ }
-    //       console.log(`....inside workQueue.process ${job.id} - after insert`);
-    //     });
-    //   }else{
-    //     console.log(`....inside workQueue.process ${job.id} - before update`);
-    //     db.run("UPDATE jobs SET status=? WHERE jobid=?", ['In Progress', job.id],function(err,rows){
-    //       if (err) { console.log(err); /*throw an error*/ }
-    //     });
-    //   }
-    // });
-
-    // var conn = new jsforce.Connection({
-    //   oauth2 : {
-    //     loginUrl : process.env.SF_LOGIN_URL,
-    //     clientId : process.env.SF_CLIENT_ID,
-    //     clientSecret : process.env.SF_CLIENT_SECRET,
-    //     redirectUri : process.env.SF_REDIRECT_URL
-    //   }
-    // });
-
-    // conn.login(process.env.SF_USERNAME, process.env.SF_PASSWORD, (err, userInfo) => {
-    //   if (err) { return console.error(err); }
-    //   progress = 50;
-    //   job.progress(progress);
-    //   //process.env.SF_ACCESS_TOKEN=conn.accessToken;
-    //   //process.env.SF_INSTANCE_URL=conn.instanceUrl;
-
-    //   const sobjectJSON = { ApexClass__c : 'jsforce', ApexMethodName__c: 'create', Object_Name__c: 'Custom_Errors__c', Name: `heroku-node-worker-job-${job.id}`};
-    //   // Single record creation
-    //   conn.sobject("Custom_Errors__c").create(sobjectJSON, function(err, ret) {
-    //     if (err || !ret.success) { 
-    //       console.error("Error in creating salesforce record : " + err);
-    //       return console.error(err, ret); 
-    //     }
-    //     process.env.sfdcId = ret.id;
-    //     console.log("Created record id : " + ret.id);
-    //   });
-      
-    //   job.progress(90);
-    //   conn.logout();      
-
-    // });  
-
-
     
     // A job can return values that will be stored in Redis as JSON
     // This return value is unused in this demo application.
@@ -237,10 +179,7 @@ async function fetchDataExtensionRecords(jobid, conn, pOverallStatus, pRequestId
   }else{
     reqBody=`<?xml version="1.0" encoding="utf-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><soapenv:Header><fueloauth>${process.env.access_token}</fueloauth></soapenv:Header><soapenv:Body><RetrieveRequestMsg xmlns="http://exacttarget.com/wsdl/partnerAPI"><RetrieveRequest><ClientIDs><ClientID>${process.env.MC_ACCOUNT_ID}</ClientID></ClientIDs><ObjectType>DataExtensionObject[SF_ZIPCODE_SERVICEAREA]</ObjectType><Properties>Id</Properties><Properties>Name</Properties><Properties>Service_Area__c</Properties><Properties>Zip_Country__c</Properties><Options><BatchSize>${batch_size}</BatchSize></Options></RetrieveRequest></RetrieveRequestMsg></soapenv:Body></soapenv:Envelope>`;
   }
-  
-  //job.progress=50;
 
-  //console.log('fetchDataExtensionRecords . body:'+JSON.stringify(reqBody));
 
   var options = { method: 'POST',
     url: process.env.soap_instance_url + 'Service.asmx',
@@ -275,18 +214,14 @@ async function fetchDataExtensionRecords(jobid, conn, pOverallStatus, pRequestId
             obj[key] = prop.Value; 
           }
         });
-        //console.log('parseString: obj :' + JSON.stringify(obj));        
         return {...obj};
       });
-      //console.log('fetchDataExtensionRecords . parseString . count:'+jsonResults.length + ' overallStatus: ' + overallStatus + ' requestId: ' + requestId);
-      //process.env.DE_RECORDS = JSON.stringify(jsonResults);   
+
       console.log('1.3....calling updateSFMCRecordCount ');
       await updateSFMCRecordCount(jobid, parseInt(jsonResults.length));
       console.log('1.4....calling salesforceBulkUpsert ');
-      await salesforceBulkUpsert(jobid, conn, jsonResults, overallStatus, requestId);      
-
+      await salesforceBulkUpsert(jobid, conn, jsonResults, overallStatus, requestId);
     });
-
   });
   return 'done';
 }//fetchDataExtensionRecords
@@ -295,11 +230,9 @@ async function fetchDataExtensionRecords(jobid, conn, pOverallStatus, pRequestId
 async function salesforceBulkUpsert(jobid, conn, records, pOverallStatus, pRequestId){
   console.log('------3.1....inside salesforceBulkUpsert ');
   conn.bulk.pollTimeout = 60000; // Bulk timeout can be specified globally on the connection object
-  //console.log('fetchDataExtensionRecords . records: ' + JSON.stringify(records));
   conn.bulk.load("ZipCode__c", "upsert", {extIdField:'ExternalKey__c'}, records, async (err, rets) => {
     if (err) { return console.error(err); }
     console.log('------3.2....inside salesforceBulkUpsert  bulk.load.upsert');
-    //process.env.total_records = (process.env.total_records===undefined? parseInt(records.length):parseInt(process.env.total_records)+records.length);
     var successCounter=0;
     var failureCounter=0;
     for (var i=0; i < rets.length; i++) {
@@ -309,9 +242,6 @@ async function salesforceBulkUpsert(jobid, conn, records, pOverallStatus, pReque
         failureCounter++;
       }
     }//for
-    //process.env.success_records = (process.env.success_records===undefined?successCounter:parseInt(process.env.success_records)+successCounter);
-    //process.env.failure_records = (process.env.failure_records===undefined?failureCounter:parseInt(process.env.failure_records)+failureCounter);  
-    //console.log('2.3....inside salesforceBulkUpsert . total_records='+process.env.total_records + ' success_records='+process.env.success_records + ' failure_records='+process.env.failure_records + ' pOverallStatus:' + pOverallStatus);  
 
     console.log('------3.3....calling updateSFSCRecordCount');
     await updateSFSCRecordCount(jobid, successCounter);
@@ -321,9 +251,7 @@ async function salesforceBulkUpsert(jobid, conn, records, pOverallStatus, pReque
       await fetchDataExtensionRecords(jobid, conn, pOverallStatus, pRequestId);
     }else{
       console.log('------3.5....UPDATE jobs.status=Completed');
-      pool.query("UPDATE jobs SET status=$1, end_dt=now() WHERE jobid=$3", ['Completed', jobid],function(err,rows){
-        if (err) { console.log(err); /*throw an error*/ }
-      });
+      await updateJobStatus(jobid, 'Completed');
     }
   });//load
   
@@ -331,108 +259,18 @@ async function salesforceBulkUpsert(jobid, conn, records, pOverallStatus, pReque
 
 async function updateSFMCRecordCount(jobid, recordcount){
   console.log('----2.1....inside updateSFMCRecordCount ');
-  var promiseQuery = () => {
-    return new Promise((resolve, reject) => {
-        pool.query('SELECT * FROM jobs WHERE jobid =$1', [ jobid ], (err, results) => {
-          if (err) { 
-            console.log('----2.2....inside updateSFMCRecordCount . promiseQuery.reject');
-            reject(err) 
-          }else{
-            console.log('----2.2....inside updateSFMCRecordCount . promiseQuery.resolve');
-            resolve(results.rows);            
-          }});
-    });
-  }
-  var rows = await promiseQuery();
+  var rows = await queryJobById(jobid);
 
-  var mc_records = (rows[0].mc_records==undefined?0:rows[0].mc_records);
-  var newCount = mc_records + recordcount;
-  console.log('----2.3....inside updateSFMCRecordCount . mc_records: ' + mc_records + ' newCount:' + newCount);
+  var newCount = (rows[0].mc_records==undefined?0:rows[0].mc_records) + recordcount;
+  return await updateSCcount(jobid, newCount);
+}//updateSFMCRecordCount
 
-  var promiseUpdate = () => { 
-    return new Promise((resolve, reject) => {
-      pool.query("UPDATE jobs SET mc_records=$1 WHERE jobid=$2", [newCount, rows[0].jobid], (err, results2)=>{
-          if (err) {
-            console.log('----2.4....inside updateSFMCRecordCount . promiseUpdate.reject');
-            reject(err);
-          }else{
-            console.log('----2.4....inside updateSFMCRecordCount . promiseUpdate.resolve');
-            resolve(results2.rows);            
-          }});
-    });
-  }
-  return await promiseUpdate();
-
-  // await db.get('SELECT * FROM jobs WHERE jobid = ?', [ jobid ], async (err, row) => {
-  //   if (err) { console.log(err); /*throw an error*/ }
-  //   if (row) { 
-  //     let mc_records = (row.MC_RECORDS==undefined?0:row.MC_RECORDS);
-  //     console.log(`updateSFMCRecordCount . jobid = ${jobid} mc_records = ${mc_records}`);      
-  //     mc_records += recordcount;
-  //     console.log(`updateSFMCRecordCount . jobid = ${jobid} mc_records = ${mc_records}`);
-  //     db.run("UPDATE jobs SET MC_RECORDS=? WHERE jobid=?", [mc_records, jobid],function(err,rows){
-  //       if (err) { console.log(err); /*throw an error*/ 
-  //       }else{
-  //         console.log('successfully updated MC_RECORDS');
-  //       }
-  //     });
-  //   }
-  // });
-}
 async function updateSFSCRecordCount(jobid, recordcount){
   console.log('--------4.1....inside updateSFSCRecordCount ');
-  var promiseQuery = () => {
-    return new Promise((resolve, reject) => {
-        pool.query('SELECT * FROM jobs WHERE jobid =$1', [ jobid ], (err, results) => {
-          if (err) { 
-            console.log('--------4.2....inside updateSFSCRecordCount promiseQuery.reject');
-            reject(err);
-          }else{
-            console.log('--------4.2....inside updateSFSCRecordCount promiseQuery.resolve');
-            resolve(results.rows);            
-          }});
-    });
-  }
-  var rows = await promiseQuery();
-
-  var sc_records = (rows[0].sc_records==undefined?0:rows[0].sc_records);
-  sc_records += recordcount;
-
-  var promiseUpate = () => {
-    return new Promise((resolve, reject) => {
-      pool.query("UPDATE jobs SET sc_records=$1 WHERE jobid=$2", [sc_records, jobid], (err,results2)=>{
-          if (err) { 
-            console.log('--------4.3....inside updateSFSCRecordCount promiseUpate.reject');
-            reject(err);
-          }else{
-            console.log('--------4.3....inside updateSFSCRecordCount promiseUpate.resolve');
-            resolve(results2.rows);            
-          }});
-    });
-  }
-  return await promiseUpate();
-
-  /*
-  await db.get('SELECT * FROM jobs WHERE jobid = ?', [ jobid ], async (err, row) => {
-    if (err) { 
-      console.log(err); 
-      //throw an error 
-    }
-    if (row) { 
-      let sc_records = (row.SC_RECORDS==undefined?0:row.SC_RECORDS);
-      sc_records += recordcount;
-      await db.run("UPDATE jobs SET SC_RECORDS=? WHERE jobid=?", [sc_records, jobid],function(err,rows){
-        if (err) { 
-          console.log(err); 
-          //throw an error 
-        }else{
-          console.log('successfully updated SC_RECORDS');
-        }
-      });
-    }
-  });  
-  */
-}
+  var rows = await queryJobById(jobid);
+  var newCount = (rows[0].sc_records==undefined?0:rows[0].sc_records) + recordcount;
+  return await updateSCcount(jobid, newCount);
+}//updateSFSCRecordCount
 
 async function queryJobById(jobid){
   console.log('....inside queryJobById ');
@@ -465,11 +303,12 @@ async function updateJobStatus(jobid, status){
   }
   return await promiseUpdate();
 }//updateJobStatus
+
 async function insertJob(jobid, status, message){
   console.log('....inside insertJob '+ jobid);
   var promiseInsert = () => {
     return new Promise((resolve, reject) => {
-        pool.query('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES($1,$2,$3,$4,$5)', [ jobid, status, message, 0, 0 ], (err, results) => {
+        pool.query('INSERT INTO jobs(jobid, status, message, mc_records, sc_records, start_dt) VALUES($1,$2,$3,$4,$5,now()) RETURNING *', [ jobid, status, message, 0, 0 ], (err, results) => {
           if (err) { 
             console.log('....inside insertJob . reject');
             reject(err) 
@@ -481,6 +320,40 @@ async function insertJob(jobid, status, message){
   }
   return await promiseInsert();
 }//insertJob
+
+async function updateMCcount(jobid, recordcount){
+  console.log('....inside updateMCcount ');
+  var promiseUpdate = () => {
+    return new Promise((resolve, reject) => {
+        pool.query('UPDATE jobs SET mc_records=$1 WHERE jobid =$2', [ recordcount, jobid ], (err, results) => {
+          if (err) { 
+            console.log('....inside updateMCcount . reject');
+            reject(err) 
+          }else{
+            console.log('....inside updateMCcount . resolve');
+            resolve(results.rows);
+          }});
+    });
+  }
+  return await promiseUpdate();
+}//updateMCcount
+
+async function updateSCcount(jobid, recordcount){
+  console.log('....inside updateSCcount ');
+  var promiseUpdate = () => {
+    return new Promise((resolve, reject) => {
+        pool.query('UPDATE jobs SET sc_records=$1 WHERE jobid =$2', [ recordcount, jobid ], (err, results) => {
+          if (err) { 
+            console.log('....inside updateSCcount . reject');
+            reject(err) 
+          }else{
+            console.log('....inside updateSCcount . resolve');
+            resolve(results.rows);
+          }});
+    });
+  }
+  return await promiseUpdate();
+}//updateSCcount
 
 // Initialize the clustered worker process
 // See: https://devcenter.heroku.com/articles/node-concurrency for more info
