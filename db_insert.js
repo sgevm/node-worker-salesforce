@@ -9,7 +9,7 @@ db.run('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(
     console.log('....insert success');
 }});           
  
-dbc.all('SELECT * FROM jobs', [], function(err, rows) {
+db.all('SELECT * FROM jobs', [], function(err, rows) {
     if (err) { 
         console.log('error with SELECT');
         console.log(err);
