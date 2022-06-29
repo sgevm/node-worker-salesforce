@@ -118,12 +118,12 @@ app.delete('/job/:id', async (req, res) => {
     res.sendStatus(200);// json({id});
   }
 
-  db.run("DELETE FROM jobs WHERE jobid=?", id, function(err) {
+  db.run("DELETE FROM jobs WHERE jobid=?", [id], function(err) {
     if(err){
         console.log(err)
     }
     else{
-        console.log("Successful");
+        console.log("DELETE Successful");
     }
   });
 
