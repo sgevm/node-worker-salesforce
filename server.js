@@ -94,13 +94,22 @@ app.get('/jobtable', async (req, res) => {
   // console.log(rowsjson);
   // res.json(rowsjson);
 
-  db.all("SELECT * FROM jobs", (err,rows) => {
-    var rowsjson = rows.map((row) => {
+  //   db.all("SELECT * FROM jobs", (err,rows) => {
+  //   var rowsjson = rows.map((row) => {
+  //         return {jobid: row.jobid, external_key: row.external_key, status: row.status, message: row.message, mc_records: row.mc_records, sc_records: row.sc_records};
+  //   });
+  //   console.log('GET /jobtable');
+  //   console.log(rowsjson);
+  //   res.json(rowsjson);
+  // });
+
+  var rows = await queryAllJobs();
+      var rowsjson = rows.map((row) => {
           return {jobid: row.jobid, external_key: row.external_key, status: row.status, message: row.message, mc_records: row.mc_records, sc_records: row.sc_records};
     });
+    console.log('GET /jobtable');
     console.log(rowsjson);
     res.json(rowsjson);
-  });
 });
 
 // Allows the client to query the state of a background job
@@ -128,6 +137,21 @@ app.delete('/job/:id', async (req, res) => {
   });
 
 });
+
+async function queryAllJobs(){
+  console.log('....inside queryAllJobs ');
+  var promiseQuery = () => {
+    return new Promise((resolve, reject) => {
+        db.all('SELECT * FROM jobs', [ ], (err, rows) => {
+          if (err) { 
+            reject(err) 
+          }else{
+            resolve(rows);
+          }});
+    });
+  }
+  return await promiseQuery();
+}//queryAllJobs
 
 // You can listen to global events to get notified when jobs are processed
 workQueue.on('global:completed', (jobId, result) => {
