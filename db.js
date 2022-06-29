@@ -48,6 +48,13 @@ pool.query("CREATE TABLE IF NOT EXISTS jobs\
     mc_records integer,\
     sc_records integer,\
     CONSTRAINT jobs_pkey PRIMARY KEY (jobid)\
-)",(err, res)=>console.log(err,res));
+)",(err, res)=>{
+  if (err) {
+    console.log('Create table error !');
+    console.log(err);  
+  }
+  console.log('Create table result;');
+  console.log(res);
+});
 
 module.exports = pool;

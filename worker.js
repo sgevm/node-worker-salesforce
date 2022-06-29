@@ -262,24 +262,27 @@ async function updateSFMCRecordCount(jobid, recordcount){
   var rows = await queryJobById(jobid);
 
   var newCount = (rows[0].mc_records==undefined?0:rows[0].mc_records) + recordcount;
-  return await updateSCcount(jobid, newCount);
+  console.log(`----2.1....inside updateSFMCRecordCount - ${newCount}`);
+  return await updateMCcount(jobid, newCount);
 }//updateSFMCRecordCount
 
 async function updateSFSCRecordCount(jobid, recordcount){
   console.log('--------4.1....inside updateSFSCRecordCount ');
-  var rows = await queryJobById(jobid);
+  var rows = await queryJobById(jobid);  
   var newCount = (rows[0].sc_records==undefined?0:rows[0].sc_records) + recordcount;
+  console.log(`--------4.1....inside updateSFSCRecordCount - ${newCount}`);
   return await updateSCcount(jobid, newCount);
 }//updateSFSCRecordCount
 
 async function queryJobById(jobid){
-  console.log('....inside queryJobById ');
+  console.log(`....inside queryJobById ${jobid}`);
   var promiseQuery = () => {
     return new Promise((resolve, reject) => {
         pool.query('SELECT * FROM jobs WHERE jobid =$1', [ jobid ], (err, results) => {
           if (err) { 
             reject(err) 
           }else{
+            console.log(`....inside queryJobById results.rows:` + JSON.stringify(results.rows));
             resolve(results.rows);
           }});
     });
@@ -322,7 +325,7 @@ async function insertJob(jobid, status, message){
 }//insertJob
 
 async function updateMCcount(jobid, recordcount){
-  console.log('....inside updateMCcount ');
+  console.log(`....inside updateMCcount ${jobid} ${recordcount}`);
   var promiseUpdate = () => {
     return new Promise((resolve, reject) => {
         pool.query('UPDATE jobs SET mc_records=$1 WHERE jobid =$2', [ recordcount, jobid ], (err, results) => {
@@ -339,7 +342,7 @@ async function updateMCcount(jobid, recordcount){
 }//updateMCcount
 
 async function updateSCcount(jobid, recordcount){
-  console.log('....inside updateSCcount ');
+  console.log(`....inside updateSCcount ${jobid} ${recordcount}`);
   var promiseUpdate = () => {
     return new Promise((resolve, reject) => {
         pool.query('UPDATE jobs SET sc_records=$1 WHERE jobid =$2', [ recordcount, jobid ], (err, results) => {
