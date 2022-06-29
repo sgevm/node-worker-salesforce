@@ -147,7 +147,7 @@ window.onload = function() {
   document.querySelector("#add-job").addEventListener("click", addJob);
   document.querySelector("#clear").addEventListener("click", clear);
   document.querySelector("#refresh").addEventListener("click", refresh);
-  document.querySelector("#refreshstatus").addEventListener("click", refreshstatus);
+  //document.querySelector("#refreshstatus").addEventListener("click", refreshstatus);
   //document.querySelector("#joblog").addEventListener("click", joblogs);
   refresh();
   renderJobsTable();
