@@ -1,6 +1,6 @@
 let express = require('express');
 let Queue = require('bull');
-var db = require("./db");
+var pool = require("./db");
 
 // Serve on PORT on Heroku and on localhost:5000 locally
 let PORT = process.env.PORT || '5000';
@@ -104,12 +104,17 @@ app.get('/jobtable', async (req, res) => {
   // });
 
   var rows = await queryAllJobs();
-      var rowsjson = rows.map((row) => {
-          return {jobid: row.jobid, external_key: row.external_key, status: row.status, message: row.message, mc_records: row.mc_records, sc_records: row.sc_records};
+  if (rows!=undefined) {
+    var rowsjson = rows.map((row) => {
+      return {jobid: row.jobid, external_key: row.external_key, status: row.status, message: row.message, mc_records: row.mc_records, sc_records: row.sc_records, start_dt:row.start_dt, end_dt:row.end_dt};
     });
     console.log('GET /jobtable');
     console.log(rowsjson);
-    res.json(rowsjson);
+    res.json(rowsjson);    
+  }else{
+    res.json([]);    
+  }
+
 });
 
 // Allows the client to query the state of a background job
@@ -127,7 +132,7 @@ app.delete('/job/:id', async (req, res) => {
     res.sendStatus(200);// json({id});
   }
 
-  db.run("DELETE FROM jobs WHERE jobid=?", [id], function(err) {
+  pool.query("DELETE FROM jobs WHERE jobid=$1", [id], function(err) {
     if(err){
         console.log(err)
     }
@@ -142,13 +147,13 @@ async function queryAllJobs(){
   console.log('....inside queryAllJobs ');
   var promiseQuery = () => {
     return new Promise((resolve, reject) => {
-        db.all('SELECT * FROM jobs', [ ], (err, rows) => {
+        pool.query('SELECT * FROM jobs;', [], (err, results) => {
           if (err) { 
             console.log('....inside queryAllJobs .reject ');
             reject(err) 
           }else{
-            console.log('....inside queryAllJobs . resolve . ' + rows.length);
-            resolve(rows);
+            console.log('....inside queryAllJobs . resolve . ' + (results==undefined?0:results.rows.length));
+            resolve(results.rows);
           }});
     });
   }

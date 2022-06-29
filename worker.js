@@ -4,8 +4,8 @@ var Queue = require("bull");
 var jsforce = require("jsforce");
 const request = require("request");
 var parseString = require('xml2js').parseString;
-const db = require("./db");
-
+//const db = require("./db");
+const pool = require("./db");
 
 
 // Connect to a local redis instance locally, and the Heroku-provided URL in production
@@ -26,7 +26,7 @@ function start(id, disconnect) {
 
   process.on('SIGTERM', ()=>{
     console.log('shutdown');
-    db.run("UPDATE jobs SET status=?, message=? WHERE status=?", ['Aborted', 'Aborted on shutdown', 'In Progress'],function(err,rows){
+    pool.query("UPDATE jobs SET status=$1, message=$2 WHERE status=$3", ['Aborted', 'Aborted on shutdown', 'In Progress'],function(err,rows){
       if (err) { 
         console.log('shutdown . update jobs.status & message:'); 
         console.log(err); 
@@ -49,8 +49,8 @@ function start(id, disconnect) {
 
     try{
       var row = await queryJobById(job.id);
-      if (row) {
-        console.log(row);
+      if (row[0]) {
+        //console.log(row);
         console.log(`....inside workQueue.process ${job.id} - before update`);
         var rows = await updateJobStatus(job.id, 'In Progress');
         console.log(`....inside workQueue.process ${job.id} - after update`);
@@ -58,14 +58,12 @@ function start(id, disconnect) {
         // console.log(`....inside workQueue.process ${job.id} - before insert`);
         // await insertJob(job.id, 'In Progress', 'New', 0, 0);
         // console.log(`....inside workQueue.process ${job.id} - after insert`);
-        db.run('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?,?,?,?,?);', [ job.id, 'In Progress', 'New', 0, 0 ], function (err) {
+        pool.query('INSERT INTO jobs(jobid, status, message, mc_records, sc_records, start_dt) VALUES($1,$2,$3,$4,$5,now()) RETURNING *', [ job.id, 'In Progress', 'New', 0, 0 ], function (err, results) {
           if (err) { 
             console.log('....insert error');
             console.log(err);
           }else{
-            console.log('....insert success');
-            console.log(`....insert success${this.lastID}`);
-            console.log(this.changes);
+            console.log('....insert success ' + results.rows.length);
             console.log(`....inside workQueue.process - before generateToken`);
             generateToken(job);
             console.log(`....inside workQueue.process - after generateToken`);            
@@ -263,7 +261,7 @@ async function fetchDataExtensionRecords(jobid, conn, pOverallStatus, pRequestId
       const requestId = retrieveResponse.RequestID;
 
       console.log('1.2....inside fetchDataExtensionRecords UPDATE jobs.extenal_key');
-      db.run("UPDATE jobs SET external_key=? WHERE jobid=?", [retrieveResponse.RequestID, jobid],function(err,rows){
+      pool.query("UPDATE jobs SET external_key=$1 WHERE jobid=$2", [retrieveResponse.RequestID, jobid],function(err,rows){
         if (err) { console.log(err); /*throw an error*/ }
       });
 
@@ -323,7 +321,7 @@ async function salesforceBulkUpsert(jobid, conn, records, pOverallStatus, pReque
       await fetchDataExtensionRecords(jobid, conn, pOverallStatus, pRequestId);
     }else{
       console.log('------3.5....UPDATE jobs.status=Completed');
-      db.run("UPDATE jobs SET status=?, end_dt=datetime('now') WHERE jobid=?", ['Completed', jobid],function(err,rows){
+      pool.query("UPDATE jobs SET status=$1, end_dt=now() WHERE jobid=$3", ['Completed', jobid],function(err,rows){
         if (err) { console.log(err); /*throw an error*/ }
       });
     }
@@ -335,34 +333,35 @@ async function updateSFMCRecordCount(jobid, recordcount){
   console.log('----2.1....inside updateSFMCRecordCount ');
   var promiseQuery = () => {
     return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM jobs WHERE jobid =?', [ jobid ], (err, row) => {
+        pool.query('SELECT * FROM jobs WHERE jobid =$1', [ jobid ], (err, results) => {
           if (err) { 
+            console.log('----2.2....inside updateSFMCRecordCount . promiseQuery.reject');
             reject(err) 
           }else{
-
-            resolve(row);
             console.log('----2.2....inside updateSFMCRecordCount . promiseQuery.resolve');
+            resolve(results.rows);            
           }});
     });
   }
-  var row = await promiseQuery();
+  var rows = await promiseQuery();
 
-  var mc_records = (row.mc_records==undefined?0:row.mc_records);
+  var mc_records = (rows[0].mc_records==undefined?0:rows[0].mc_records);
   var newCount = mc_records + recordcount;
   console.log('----2.3....inside updateSFMCRecordCount . mc_records: ' + mc_records + ' newCount:' + newCount);
 
-  var promiseUpate = () => { 
+  var promiseUpdate = () => { 
     return new Promise((resolve, reject) => {
-      db.run("UPDATE jobs SET mc_records=? WHERE jobid=?", [newCount, row.jobid], (err,rows)=>{
-          if (err) { 
-            reject(err) 
+      pool.query("UPDATE jobs SET mc_records=$1 WHERE jobid=$2", [newCount, rows[0].jobid], (err, results2)=>{
+          if (err) {
+            console.log('----2.4....inside updateSFMCRecordCount . promiseUpdate.reject');
+            reject(err);
           }else{
-            resolve(rows);
-            console.log('----2.4....inside updateSFMCRecordCount . promiseUpate.resolve');
+            console.log('----2.4....inside updateSFMCRecordCount . promiseUpdate.resolve');
+            resolve(results2.rows);            
           }});
     });
   }
-  var rows = await promiseUpate();
+  return await promiseUpdate();
 
   // await db.get('SELECT * FROM jobs WHERE jobid = ?', [ jobid ], async (err, row) => {
   //   if (err) { console.log(err); /*throw an error*/ }
@@ -384,32 +383,34 @@ async function updateSFSCRecordCount(jobid, recordcount){
   console.log('--------4.1....inside updateSFSCRecordCount ');
   var promiseQuery = () => {
     return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM jobs WHERE jobid =?', [ jobid ], (err, row) => {
+        pool.query('SELECT * FROM jobs WHERE jobid =$1', [ jobid ], (err, results) => {
           if (err) { 
-            reject(err) 
+            console.log('--------4.2....inside updateSFSCRecordCount promiseQuery.reject');
+            reject(err);
           }else{
-            resolve(row);
             console.log('--------4.2....inside updateSFSCRecordCount promiseQuery.resolve');
+            resolve(results.rows);            
           }});
     });
   }
-  var row = await promiseQuery();
+  var rows = await promiseQuery();
 
-  var sc_records = (row.sc_records==undefined?0:row.sc_records);
+  var sc_records = (rows[0].sc_records==undefined?0:rows[0].sc_records);
   sc_records += recordcount;
 
   var promiseUpate = () => {
     return new Promise((resolve, reject) => {
-      db.run("UPDATE jobs SET sc_records=? WHERE jobid=?", [sc_records, jobid], (err,rows)=>{
+      pool.query("UPDATE jobs SET sc_records=$1 WHERE jobid=$2", [sc_records, jobid], (err,results2)=>{
           if (err) { 
-            reject(err) 
+            console.log('--------4.3....inside updateSFSCRecordCount promiseUpate.reject');
+            reject(err);
           }else{
-            resolve(rows);
             console.log('--------4.3....inside updateSFSCRecordCount promiseUpate.resolve');
+            resolve(results2.rows);            
           }});
     });
   }
-  var rows = await promiseUpate();
+  return await promiseUpate();
 
   /*
   await db.get('SELECT * FROM jobs WHERE jobid = ?', [ jobid ], async (err, row) => {
@@ -437,11 +438,11 @@ async function queryJobById(jobid){
   console.log('....inside queryJobById ');
   var promiseQuery = () => {
     return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM jobs WHERE jobid =?', [ jobid ], (err, row) => {
+        pool.query('SELECT * FROM jobs WHERE jobid =$1', [ jobid ], (err, results) => {
           if (err) { 
             reject(err) 
           }else{
-            resolve(row);
+            resolve(results.rows);
           }});
     });
   }
@@ -452,13 +453,13 @@ async function updateJobStatus(jobid, status){
   console.log('....inside updateJobStatus ');
   var promiseUpdate = () => {
     return new Promise((resolve, reject) => {
-        db.get('UPDATE jobs SET status=? WHERE jobid =?', [ status, jobid ], (err, rows) => {
+        pool.query('UPDATE jobs SET status=$1 WHERE jobid =$2', [ status, jobid ], (err, results) => {
           if (err) { 
             console.log('....inside updateJobStatus . reject');
             reject(err) 
           }else{
             console.log('....inside updateJobStatus . resolve');
-            resolve(rows);
+            resolve(results.rows);
           }});
     });
   }
@@ -468,13 +469,13 @@ async function insertJob(jobid, status, message){
   console.log('....inside insertJob '+ jobid);
   var promiseInsert = () => {
     return new Promise((resolve, reject) => {
-        db.run('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?,?,?,?,?)', [ jobid, status, message, 0, 0 ], (err) => {
+        pool.query('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES($1,$2,$3,$4,$5)', [ jobid, status, message, 0, 0 ], (err, results) => {
           if (err) { 
             console.log('....inside insertJob . reject');
             reject(err) 
           }else{
             console.log('....inside insertJob . resolve');
-            resolve('Success!');
+            resolve(results.rows);
           }});
     });
   }
