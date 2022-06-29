@@ -144,8 +144,10 @@ async function queryAllJobs(){
     return new Promise((resolve, reject) => {
         db.all('SELECT * FROM jobs', [ ], (err, rows) => {
           if (err) { 
+            console.log('....inside queryAllJobs .reject ');
             reject(err) 
           }else{
+            console.log('....inside queryAllJobs . resolve . ' + rows.length);
             resolve(rows);
           }});
     });
