@@ -78,7 +78,7 @@ app.get('/jobs', async (req, res) => {
 app.get('/jobtable', async (req, res) => {
   var promiseQueryAll = () => {
     return new Promise((resolve, reject) => {
-      db.all("SELECT * FROM jobs", (err,rows) => {
+      db.all("SELECT * FROM jobs", [], (err,rows) => {
           if (err) { 
             reject(err) 
           }else{
