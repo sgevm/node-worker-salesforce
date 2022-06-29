@@ -3,27 +3,28 @@ let jobs = {};
 
 // Kick off a new job by POST-ing to the server
 async function addJob() {
-  console.log('addJob . job: ');
   let res = await fetch('/job', {method: 'POST'});
   let job = await res.json();
   jobs[job.id] = {id: job.id, state: "queued"};
-  render();
-  await renderJobsTable();
+  await refresh();
 }
+
+async function removejob(e) {
+  e.preventDefault();    
+  var jobid=e.target.getAttribute("data-jobid");
+  let res = await fetch(`/job/${jobid}`, {method: 'DELETE'});
+  await refresh();
+}//removejob
 
 async function updateJobs() {
     jobs={};
     let res = await fetch(`/jobs`);
     var result = [];
     result = await res.json();
-    console.log('updateJobs . result:' +JSON.stringify(result));
-    console.log(result);
     result.forEach(job => {
       jobs[job.id] = job;
     });
-    console.log('refresh . updateJobs . jobs');
-    console.log(jobs);
-}
+}//updateJobs
 
 async function renderJobsTable() {
   let res = await fetch(`/jobtable`);
@@ -37,26 +38,6 @@ async function renderJobsTable() {
   document.querySelector("#job-table").innerHTML = htmlval;
 }//renderJobsTable
 
-
-
-async function remove(e) {
-  e.preventDefault();    
-  var jobid=e.target.getAttribute("data-jobid");
-  console.log('jobid:'+jobid); 
-  let res = await fetch(`/job/${jobid}`, {method: 'DELETE'});
-  await updateJobs();
-  await renderJobsTable();
-}//joblogs
-
-async function removejob(e) {
-  e.preventDefault();    
-  var jobid=e.target.getAttribute("data-jobid");
-  console.log('removejob . jobid:'+jobid); 
-  let res = await fetch(`/job/${jobid}`, {method: 'DELETE'});
-  await updateJobs();
-  await renderJobsTable();
-}//removejob
-
 // Manual Refresh jobs info
 async function refresh() {
  await updateJobs();
@@ -67,31 +48,22 @@ async function refresh() {
     jobs[id] = result;
   }      
 }
-render();
+await render();
 await renderJobsTable();
 }//refresh
 
 async function refreshstatus() {
-  await updateJobs();
-  for (let id of Object.keys(jobs)) {
-      let res = await fetch(`/job/${id}`);
-      let result = await res.json();
-      if (!!jobs[id]) {
-        jobs[id] = result;
-      }      
-  }
-  render();
+  await refresh();
 }//refreshstatus
 
 // Delete all stored jobs
-function clear() {
+async function clear() {
   jobs = {};
-  render();
-  renderJobsTable();
+  await refresh();
 }
 
 // Update the UI
-function render() {
+async function render() {
   let s = "";
   for (let id of Object.keys(jobs)) {
     s += renderJob(jobs[id]);
@@ -128,28 +100,10 @@ function renderJob(job) {
     .replace('{{reason}}', reason);
 }//renderJob
 
-async function joblogs(e) {
-  e.preventDefault();    
-  var jobid=e.target.getAttribute("data-jobid");
-  console.log('jobid:'+jobid); 
-
-  let res = await fetch(`/job/${jobid}/logs`);
-  var logs = jobid + ' - ' + 'logs';//(await res.json()).logs;
-  var s = document.querySelector('#job-logs-template')
-    .innerHTML
-    .replace('{{logs}}', logs);
-
-  document.querySelector("#job-logs").innerHTML = s;
-}//renderJob
-
 // Attach click handlers and kick off background processes
 window.onload = function() {
   document.querySelector("#add-job").addEventListener("click", addJob);
   document.querySelector("#clear").addEventListener("click", clear);
-  document.querySelector("#refresh").addEventListener("click", refresh);
-  //document.querySelector("#refreshstatus").addEventListener("click", refreshstatus);
-  //document.querySelector("#joblog").addEventListener("click", joblogs);
-  refresh();
-  renderJobsTable();
-  //setInterval(updateJobs, 200);
+  document.querySelector("#refresh").addEventListener("click", refresh);  
+  await refresh();
 };
