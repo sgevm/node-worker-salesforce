@@ -41,6 +41,19 @@ var dbc = new sqlite3.Database('./var/db/jobs.db',(err)=>{
             }
             console.log('insert #2 success');
           });
+
+          dbc.all('SELECT * FROM jobs', [], function(err, rows) {
+            if (err) { 
+                console.log('error with SELECT');
+                console.log(err);
+            }
+            if (rows) {
+                console.log('success with SELECT');
+                console.log(rows);
+            }else{
+                console.log('success with SELECT . no rows');
+            }
+        });          
     }    
 });
 
