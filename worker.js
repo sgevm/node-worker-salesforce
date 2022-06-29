@@ -53,11 +53,12 @@ function start(id, disconnect) {
         console.log(row);
         console.log(`....inside workQueue.process ${job.id} - before update`);
         var rows = await updateJobStatus(job.id, 'In Progress');
-        console.log(`....inside workQueue.process ${job.id} - before update`);
+        console.log(`....inside workQueue.process ${job.id} - after update`);
       }else{
         console.log(`....inside workQueue.process ${job.id} - before insert`);
         await insertJob(job.id, 'In Progress', 'New', 0, 0);
-        console.log(`....inside workQueue.process ${job.id} - before insert`);      
+        console.log(`....inside workQueue.process ${job.id} - after insert`);
+           
       }      
     }catch(e){
       console.log(e);
@@ -464,6 +465,7 @@ async function insertJob(jobid, status, message){
             reject(err) 
           }else{
             console.log('....inside insertJob . resolve');
+            console.log(`Rows inserted ${this.changes}`);
             resolve();
           }});
     });
