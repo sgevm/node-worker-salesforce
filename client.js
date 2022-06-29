@@ -40,16 +40,16 @@ async function renderJobsTable() {
 
 // Manual Refresh jobs info
 async function refresh() {
- await updateJobs();
- for (let id of Object.keys(jobs)) {
-  let res = await fetch(`/job/${id}`);
-  let result = await res.json();
-  if (!!jobs[id]) {
-    jobs[id] = result;
-  }      
-}
-await render();
-await renderJobsTable();
+  await updateJobs();
+  for (let id of Object.keys(jobs)) {
+    let res = await fetch(`/job/${id}`);
+    let result = await res.json();
+    if (!!jobs[id]) {
+      jobs[id] = result;
+    }      
+  }
+  render();
+  await renderJobsTable();
 }//refresh
 
 async function refreshstatus() {
@@ -63,7 +63,7 @@ async function clear() {
 }
 
 // Update the UI
-async function render() {
+function render() {
   let s = "";
   for (let id of Object.keys(jobs)) {
     s += renderJob(jobs[id]);
