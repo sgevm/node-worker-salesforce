@@ -49,11 +49,17 @@ function start(id, disconnect) {
 
     try{
       var row = queryJobById(job.id);
-      var rows = updateJobStatus(job.id, 'In Progress');
+      if (row) {
+        console.log(`....inside workQueue.process ${job.id} - before update`);
+        var rows = updateJobStatus(job.id, 'In Progress');
+        console.log(`....inside workQueue.process ${job.id} - before update`);
+      }else{
+        console.log(`....inside workQueue.process ${job.id} - before insert`);
+        insertJob(job.id, 'In Progress', 'New', 0, 0);
+        console.log(`....inside workQueue.process ${job.id} - before insert`);      
+      }      
     }catch(e){
-      console.log(`....inside workQueue.process ${job.id} - before insert`);
-      insertJob(job.id, 'In Progress', 'New', 0, 0);
-      console.log(`....inside workQueue.process ${job.id} - after insert`);
+      console.log(e);
     }
 
     // db.get('SELECT * FROM jobs WHERE jobid = ?', [ job.id ], function(err, row) {
