@@ -69,7 +69,7 @@ async function remove(e) {
   var jobid=e.target.getAttribute("data-jobid");
   console.log('jobid:'+jobid); 
   let res = await fetch(`/job/${jobid}`, {method: 'DELETE'});
-  updateJobs();
+  await updateJobs();
 }//joblogs
 
 async function removejob(e) {

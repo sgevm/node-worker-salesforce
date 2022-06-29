@@ -48,15 +48,15 @@ function start(id, disconnect) {
     console.log(`....inside workQueue.process ${job.id}`);
 
     try{
-      var row = queryJobById(job.id);
+      var row = await queryJobById(job.id);
       if (row) {
         console.log(row);
         console.log(`....inside workQueue.process ${job.id} - before update`);
-        var rows = updateJobStatus(job.id, 'In Progress');
+        var rows = await updateJobStatus(job.id, 'In Progress');
         console.log(`....inside workQueue.process ${job.id} - before update`);
       }else{
         console.log(`....inside workQueue.process ${job.id} - before insert`);
-        insertJob(job.id, 'In Progress', 'New', 0, 0);
+        await insertJob(job.id, 'In Progress', 'New', 0, 0);
         console.log(`....inside workQueue.process ${job.id} - before insert`);      
       }      
     }catch(e){
