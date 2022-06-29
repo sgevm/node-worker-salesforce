@@ -87,6 +87,7 @@ async function refreshstatus() {
 function clear() {
   jobs = {};
   render();
+  renderJobsTable();
 }
 
 // Update the UI
