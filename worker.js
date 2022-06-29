@@ -51,7 +51,7 @@ function start(id, disconnect) {
       if (err) { console.log(err); /*throw an error*/ }
       if (!row) { 
         console.log(`....inside workQueue.process ${job.id} - before insert`);
-        db.run('INSERT INTO jobs (jobid, status, message, mc_records, sc_records) VALUES (?, ?, ?, ?, ?)', [job.id, 'In Progress', 'New', 0, 0], function(err) {
+        db.run('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?, ?, ?, ?, ?)', [`${job.id}`, 'In Progress', 'New', 0, 0], function(err) {
           if (err) { console.log(err); /*throw an error*/ }
           console.log(`....inside workQueue.process ${job.id} - after insert`);
         });
