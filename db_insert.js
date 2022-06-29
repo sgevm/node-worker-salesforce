@@ -6,7 +6,8 @@ db.run('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(
     console.log('....insert error');
     console.log(err);
     }else{
-    console.log('....insert success');
+    console.log(`....insert success: ${this.lastID}`);
+    console.log(this.changes);
 }});           
  
 db.all('SELECT * FROM jobs', [], function(err, rows) {
