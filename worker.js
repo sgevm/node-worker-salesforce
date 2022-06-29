@@ -47,21 +47,30 @@ function start(id, disconnect) {
 
     console.log(`....inside workQueue.process ${job.id}`);
 
-    db.get('SELECT * FROM jobs WHERE jobid = ?', [ job.id ], function(err, row) {
-      if (err) { console.log(err); /*throw an error*/ }
-      if (!row) { 
-        console.log(`....inside workQueue.process ${job.id} - before insert`);
-        db.run('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?, ?, ?, ?, ?)', [`${job.id}`, 'In Progress', 'New', 0, 0], function(err) {
-          if (err) { console.log(err); /*throw an error*/ }
-          console.log(`....inside workQueue.process ${job.id} - after insert`);
-        });
-      }else{
-        console.log(`....inside workQueue.process ${job.id} - before update`);
-        db.run("UPDATE jobs SET status=? WHERE jobid=?", ['In Progress', job.id],function(err,rows){
-          if (err) { console.log(err); /*throw an error*/ }
-        });
-      }
-    });
+    try{
+      var row = queryJobById(job.id);
+      var rows = updateJobStatus(job.id, 'In Progress');
+    }catch(e){
+      console.log(`....inside workQueue.process ${job.id} - before insert`);
+      insertJob(job.id, 'In Progress', 'New', 0, 0);
+      console.log(`....inside workQueue.process ${job.id} - after insert`);
+    }
+
+    // db.get('SELECT * FROM jobs WHERE jobid = ?', [ job.id ], function(err, row) {
+    //   if (err) { console.log(err); /*throw an error*/ }
+    //   if (!row) { 
+    //     console.log(`....inside workQueue.process ${job.id} - before insert`);
+    //     db.run('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?, ?, ?, ?, ?)', [`${job.id}`, 'In Progress', 'New', 0, 0], function(err) {
+    //       if (err) { console.log(err); /*throw an error*/ }
+    //       console.log(`....inside workQueue.process ${job.id} - after insert`);
+    //     });
+    //   }else{
+    //     console.log(`....inside workQueue.process ${job.id} - before update`);
+    //     db.run("UPDATE jobs SET status=? WHERE jobid=?", ['In Progress', job.id],function(err,rows){
+    //       if (err) { console.log(err); /*throw an error*/ }
+    //     });
+    //   }
+    // });
 
     // var conn = new jsforce.Connection({
     //   oauth2 : {
@@ -406,6 +415,55 @@ async function updateSFSCRecordCount(jobid, recordcount){
   });  
   */
 }
+
+async function queryJobById(jobid){
+  console.log('....inside queryJobById ');
+  var promiseQuery = () => {
+    return new Promise((resolve, reject) => {
+        db.get('SELECT * FROM jobs WHERE jobid =?', [ jobid ], (err, row) => {
+          if (err) { 
+            reject(err) 
+          }else{
+            resolve(row);
+          }});
+    });
+  }
+  return await promiseQuery();
+}//queryJobById
+
+async function updateJobStatus(jobid, status){
+  console.log('....inside updateJobStatus ');
+  var promiseUpdate = () => {
+    return new Promise((resolve, reject) => {
+        db.get('UPDATE jobs SET status=? WHERE jobid =?', [ status, jobid ], (err, rows) => {
+          if (err) { 
+            console.log('....inside updateJobStatus . reject');
+            reject(err) 
+          }else{
+            console.log('....inside updateJobStatus . resolve');
+            resolve(rows);
+          }});
+    });
+  }
+  return await promiseUpdate();
+}//updateJobStatus
+async function insertJob(jobid, status, message){
+  console.log('....inside insertJob ');
+  var promiseInsert = () => {
+    return new Promise((resolve, reject) => {
+        db.get('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?,?,?,?,?)', [ jobid, status, message, 0, 0 ], (err) => {
+          if (err) { 
+            console.log('....inside insertJob . reject');
+            reject(err) 
+          }else{
+            console.log('....inside insertJob . resolve');
+            resolve();
+          }});
+    });
+  }
+  await promiseInsert();
+}//insertJob
+
 // Initialize the clustered worker process
 // See: https://devcenter.heroku.com/articles/node-concurrency for more info
 throng({ workers, start });
