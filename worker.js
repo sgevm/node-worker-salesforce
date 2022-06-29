@@ -50,6 +50,7 @@ function start(id, disconnect) {
     try{
       var row = queryJobById(job.id);
       if (row) {
+        console.log(row);
         console.log(`....inside workQueue.process ${job.id} - before update`);
         var rows = updateJobStatus(job.id, 'In Progress');
         console.log(`....inside workQueue.process ${job.id} - before update`);
