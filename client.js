@@ -5,12 +5,10 @@ let jobs = {};
 async function addJob() {
   console.log('addJob . job: ');
   let res = await fetch('/job', {method: 'POST'});
-  //console.log('addJob . job . res: ');
-  //console.log(res);
   let job = await res.json();
-  //console.log(job);
   jobs[job.id] = {id: job.id, state: "queued"};
   render();
+  await renderJobsTable();
 }
 
 async function updateJobs() {
@@ -151,5 +149,6 @@ window.onload = function() {
   document.querySelector("#refreshstatus").addEventListener("click", refreshstatus);
   //document.querySelector("#joblog").addEventListener("click", joblogs);
   refresh();
+  renderJobsTable();
   //setInterval(updateJobs, 200);
 };
