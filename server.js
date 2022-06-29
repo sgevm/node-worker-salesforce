@@ -103,7 +103,7 @@ app.delete('/job/:id', async (req, res) => {
   } else {
     let state = await job.remove();
     console.log('DELETE /job/:id:'+id + ' . removed');
-    res.sendStatus(200);// json({id});
+    //res.sendStatus(200);// json({id});
   }
 
   pool.query("DELETE FROM jobs WHERE jobid=$1", [id], function(err) {
