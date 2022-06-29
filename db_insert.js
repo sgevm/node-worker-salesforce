@@ -1,7 +1,7 @@
 const db = require("./db");
 
 
-db.run('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?,?,?,?,?);', [ 5, 'In Progress', 'New', 0, 0 ], (err) => {
+db.run('INSERT INTO jobs(jobid, status, message, mc_records, sc_records) VALUES(?,?,?,?,?);', [ 5, 'In Progress', 'New', 0, 0 ], function(err) {
     if (err) { 
     console.log('....insert error');
     console.log(err);
