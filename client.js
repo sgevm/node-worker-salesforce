@@ -101,7 +101,7 @@ function renderJob(job) {
 }//renderJob
 
 // Attach click handlers and kick off background processes
-window.onload = function() {
+window.onload = async function() {
   document.querySelector("#add-job").addEventListener("click", addJob);
   document.querySelector("#clear").addEventListener("click", clear);
   document.querySelector("#refresh").addEventListener("click", refresh);  
