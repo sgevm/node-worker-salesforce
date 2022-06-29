@@ -76,31 +76,31 @@ app.get('/jobs', async (req, res) => {
 
 
 app.get('/jobtable', async (req, res) => {
-  var promiseQueryAll = () => {
-    return new Promise((resolve, reject) => {
-      db.all("SELECT * FROM jobs", [], (err,rows) => {
-          if (err) { 
-            reject(err) 
-          }else{
-            resolve(rows);
-          }});
-    });
-  }
-  var rows = await promiseQueryAll();
-  var rowsjson = rows.map((row) => {
-    return {jobid: row.jobid, external_key: row.external_key, status: row.status, message: row.message, mc_records: row.mc_records, sc_records: row.sc_records, start_dt: row.start_dt, end_dt: row.end_dt};
-  });
-  console.log('GET /jobstable:');
-  console.log(rowsjson);
-  res.json(rowsjson);
-
-  // db.all("SELECT * FROM jobs", (err,rows) => {
-  //   var rowsjson = rows.map((row) => {
-  //         return {jobid: row.jobid, external_key: row.external_key, status: row.status, message: row.message, mc_records: row.mc_records, sc_records: row.sc_records};
+  // var promiseQueryAll = () => {
+  //   return new Promise((resolve, reject) => {
+  //     db.all("SELECT * FROM jobs", [], (err,rows) => {
+  //         if (err) { 
+  //           reject(err) 
+  //         }else{
+  //           resolve(rows);
+  //         }});
   //   });
-  //   console.log(rowsjson);
-  //   res.json(rowsjson);
+  // }
+  // var rows = await promiseQueryAll();
+  // var rowsjson = rows.map((row) => {
+  //   return {jobid: row.jobid, external_key: row.external_key, status: row.status, message: row.message, mc_records: row.mc_records, sc_records: row.sc_records, start_dt: row.start_dt, end_dt: row.end_dt};
   // });
+  // console.log('GET /jobstable:');
+  // console.log(rowsjson);
+  // res.json(rowsjson);
+
+  db.all("SELECT * FROM jobs", (err,rows) => {
+    var rowsjson = rows.map((row) => {
+          return {jobid: row.jobid, external_key: row.external_key, status: row.status, message: row.message, mc_records: row.mc_records, sc_records: row.sc_records};
+    });
+    console.log(rowsjson);
+    res.json(rowsjson);
+  });
 });
 
 // Allows the client to query the state of a background job
